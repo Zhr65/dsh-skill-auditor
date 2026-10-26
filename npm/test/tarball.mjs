@@ -84,6 +84,32 @@ try {
 
   console.log('\n[3] 从安装位置真跑')
   process.env.DSH_HOME = path.join(work, 'dsh-home')
+  // 【CI 回归修复】status 默认跑 --host deepseek，该宿主 root 是
+  // ~/.dsh/profiles/desktop —— CI 上为空，scan 扫不到资产就 exit 1，
+  // 「首次调用自动建了注册表」必然失败。这里造一个假 profile 指过去，
+  // 与 smoke.mjs 同一套做法，测试不再依赖真实环境。
+  const fakeProfile = path.join(work, 'fake-profile')
+  fs.mkdirSync(path.join(fakeProfile, 'node_modules', 'demo-plugin'), { recursive: true })
+  fs.writeFileSync(path.join(fakeProfile, 'package.json'), JSON.stringify({
+    name: 'fake-profile', private: true,
+    dependencies: { 'demo-plugin': '1.0.0' },
+    dsh: { profile: { bundles: ['demo-plugin'] } },
+  }, null, 2))
+  fs.writeFileSync(path.join(fakeProfile, 'node_modules', 'demo-plugin', 'package.json'),
+    JSON.stringify({
+      name: 'demo-plugin', version: '1.0.0',
+      description: 'tarball-test fixture plugin',
+      dsh: { bundle: { patch: './cordis.patch.yml' } },
+    }, null, 2))
+  const tarDataDir = path.join(work, 'dsh-home', 'skill-auditor')
+  fs.mkdirSync(tarDataDir, { recursive: true })
+  fs.writeFileSync(path.join(tarDataDir, 'hosts.json'), JSON.stringify({
+    default_host: 'deepseek',
+    hosts: {
+      deepseek: { kind: 'plugin', label: '插件', root: fakeProfile, discover: 'deps',
+                  manifests: ['package.json', 'plugin.json'], logs: [] },
+    },
+  }, null, 2))
   const entry = new URL('file://' + path.join(installed, 'lib', 'index.js').replace(/\\/g, '/')).href
   const mod = await import(entry)
   const reg = []
