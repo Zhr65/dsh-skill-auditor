@@ -20,6 +20,7 @@
 import datetime
 import json
 import os
+import sys
 import urllib.parse
 import urllib.request
 
@@ -224,6 +225,13 @@ HOW_TO_READ = [
 
 
 def main(argv):
+    # 【CI 回归修复】Windows 控制台默认 GBK，输出中文/符号会 UnicodeEncodeError。
+    # 主动重配 stdout/stderr 为 UTF-8（errors=replace 兜底），不依赖调用方设环境变量。
+    for _s in (sys.stdout, sys.stderr):
+        try:
+            _s.reconfigure(encoding="utf-8", errors="replace")
+        except Exception:
+            pass
     if not argv:
         print("usage: market.py <关键词> [--market dsh|skillhub|both] [--limit N]")
         return 2

@@ -41,8 +41,8 @@
     },
     {
       "path": "scripts/console.py",
-      "bytes": 126170,
-      "sha256": "4825b527800cff8b8553b18266cba42646164b93bda8c522f62d663bf31f559b"
+      "bytes": 126587,
+      "sha256": "cb30e5421d98bf745fa736c2c5933066f6cc477ab7b65d5d6979c79fe4eb7b85"
     },
     {
       "path": "scripts/fingerprint.py",
@@ -56,8 +56,8 @@
     },
     {
       "path": "scripts/market.py",
-      "bytes": 10304,
-      "sha256": "9f06fc33918df957e0996d69e80da084c503694701079e7464d5b796e87aceb7"
+      "bytes": 10685,
+      "sha256": "58ca01f775f3b2fd521f22d5b179fb66446d8bc152f41e9269882f9053896cb9"
     },
     {
       "path": "scripts/regress.py",

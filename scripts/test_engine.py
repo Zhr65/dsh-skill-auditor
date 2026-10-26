@@ -474,10 +474,15 @@ class CuratedOverrideTests(unittest.TestCase):
         rec = os.path.join(self.tmp, "rec.json")
         write_json(rec, recorded)
         import subprocess
+        # 【CI 回归修复】必须给子进程显式指定 UTF-8，否则 Windows 默认 GBK 下
+        # 中文提示会被 errors="replace" 变成 '?'，断言「没有任何判定」必然匹配不上。
+        # 与模块级 run_console 保持同一口径。
+        env = dict(os.environ, PYTHONIOENCODING="utf-8", PYTHONUTF8="1")
         p = subprocess.run([sys.executable, os.path.join(SCRIPTS, "baseline.py"),
                             "--golden", os.path.join(self.golden, "demo-skill.json"),
                             "--from", rec, "--out", self.tmp, "--model", "v1"],
-                           capture_output=True, text=True, encoding="utf-8", errors="replace")
+                           capture_output=True, text=True, encoding="utf-8",
+                           errors="replace", env=env)
         return p.returncode, p.stdout + p.stderr
 
     def test_draft_without_curated_is_blocked(self):

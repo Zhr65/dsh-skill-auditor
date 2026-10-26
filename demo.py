@@ -26,6 +26,17 @@ import json
 import shutil
 import subprocess
 
+# 【CI 回归修复】Windows 控制台默认 GBK，demo 会转发引擎输出（含 ⚠ 等符号），
+# 直接 print 就 UnicodeEncodeError 崩掉。CI 的 windows job 跑 demo 时没设
+# PYTHONIOENCODING，于是必红。
+# 这里主动把 stdout/stderr 重配成 UTF-8（errors=replace 兜底），
+# 不依赖调用方设环境变量 —— 用户本地直接跑也不会崩。
+for _stream in (sys.stdout, sys.stderr):
+    try:
+        _stream.reconfigure(encoding="utf-8", errors="replace")
+    except Exception:
+        pass
+
 HERE = os.path.dirname(os.path.abspath(__file__))
 SANDBOX = os.path.join(HERE, "demo")
 ENGINE = os.path.join(SANDBOX, ".engine")

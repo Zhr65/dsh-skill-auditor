@@ -107,12 +107,21 @@ BULB = sym("💡", "*")
 
 
 def use_safe_stdio():
-    """兜底：即使遇到没预料的字符，也让它变成 '?' 而不是崩溃。"""
+    """把 stdout/stderr 强制成 UTF-8。
+
+    【CI 回归修复】原来只设 errors="replace" 不改编码 —— GBK 控制台下
+    中文/符号全变 '?'，且 demo/market 转发引擎输出时仍会崩。
+    现在统一改编码为 UTF-8，并保留 errors="replace" 兜底：
+    任何终端都能完整显示中文，最坏情况也只是个别字符变 '?'。
+    """
     for stream in (sys.stdout, sys.stderr):
         try:
-            stream.reconfigure(errors="replace")
+            stream.reconfigure(encoding="utf-8", errors="replace")
         except Exception:
-            pass
+            try:
+                stream.reconfigure(errors="replace")
+            except Exception:
+                pass
 
 # ---------------------------------------------------------------- 指纹口径
 # 指纹只覆盖**能力面**。文档/图片/锁文件不参与：
